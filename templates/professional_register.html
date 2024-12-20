@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Registration{% endblock %}
+
+
+
+{% block form %}
+
+{{ login_form.hidden_tag() }}
+<div class="m-4">
+    <h1>Professional Registration</h1>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="email" class="form-control" id="Email" placeholder="name@example.com">
+    <label for="Email">Email ID</label>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="password" class="form-control" id="Password" placeholder="Password">
+    <label for="Password">Password</label>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="FullName" placeholder="John Doe">
+    <label for="FullName">Full Name</label>
+</div>
+
+<div class="form-floating mb-3">
+    <select class="form-select" id="ServiceID">
+        <option selected>Select Service</option>
+        {% for service in services %}
+        <option value="{{ service.id }}">{{ service.name }}</option>
+        {% endfor %}
+    </select>
+    <label for="ServiceID">Service Name</label>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="Experience" placeholder="5 years">
+    <label for="Experience">Experience(in yrs.)</label>
+</div>
+
+<div class="form-floating mb-3">
+    <textarea class="form-control" placeholder="Enter your address" id="Address" style="height: 100px;"></textarea>
+    <label for="Address">Address</label>
+</div>
+
+<div class="form-floating">
+    <input type="text" class="form-control" id="Pincode" placeholder="123456">
+    <label for="Pincode">Pincode</label>
+</div>
+<div class="d-md-flex justify-content-center">
+    <button class="btn btn-primary mt-3" type="submit">Register</button>
+</div>
+
+{% endblock %}

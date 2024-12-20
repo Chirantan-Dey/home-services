@@ -1,0 +1,9 @@
+Flask
+Flask_Login
+flask_sqlalchemy
+flask_wtf
+plotly
+SQLAlchemy
+Werkzeug
+WTForms
+kaleido
