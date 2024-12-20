@@ -1,0 +1,10 @@
+# Ignore Windows system files
+desktop.ini
+*.log
+
+# Ignore Python cache files
+__pycache__/
+
+**/desktop.ini
+# Ignore virtual environments
+.venv/
