@@ -280,25 +280,114 @@ def register_routes(app,db):
             service_request_chart='charts/service_requests.png',
             professional_ratings_chart='charts/professional_ratings.png'
         )
-
-
+    
     # Professional Home Route
     @routes_bp.route('/home/professional')
     @login_required
     def professional_home():
-        return render_template("professional_home.html")
+        professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
+        open_requests = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='requested').all()
+        closed_requests = ServiceRequest.query.filter(ServiceRequest.professional_id==professional_id, ServiceRequest.service_status.in_(['assigned', 'closed'])).all()
+
+        return render_template(
+            "professional_home.html",
+            open_requests = open_requests,
+            closed_requests = closed_requests
+        )
+
+    @routes_bp.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
+    @login_required
+    def accept_service_request(request_id):
+        service_request = ServiceRequest.query.get_or_404(request_id)
+        service_request.service_status = 'assigned'
+        db.session.commit()
+        return redirect(url_for('routes_bp.professional_home'))
+
+
+    @routes_bp.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
+    @login_required
+    def reject_service_request(request_id):
+        service_request = ServiceRequest.query.get_or_404(request_id)
+        service_request.service_status = 'closed'
+        db.session.commit()
+        return redirect(url_for('routes_bp.professional_home'))
+
 
     # Professional Search Route
     @routes_bp.route('/search/professional')
     @login_required
     def professional_search():
-        return render_template("professional_search.html")
+        search_term = request.args.get('search_term', '')
+        results = []
+        if search_term:
+            search_term = f"%{search_term}%"
+            professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
+            results= ServiceRequest.query.filter(ServiceRequest.professional_id == professional_id, ServiceRequest.service_status.ilike(search_term)).all()
+        return render_template(
+        "professional_search.html",
+        search_term=search_term,
+        results=results
+        )
+
 
     # Professional Summary Route
     @routes_bp.route('/summary/professional')
     @login_required
     def professional_summary():
-        return render_template("professional_summary.html")
+        # Chart directory
+        chart_dir = os.path.join(app.static_folder, 'charts')
+        if not os.path.exists(chart_dir):
+            os.makedirs(chart_dir)
+        # Get current professional id
+        professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
+
+        # 1. Service Request Chart
+        service_requests = ServiceRequest.query.filter_by(professional_id=professional_id).all()
+        status_counts = {}
+        for request in service_requests:
+            status = request.service_status
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        statuses = list(status_counts.keys())
+        counts = list(status_counts.values())
+
+        plt.figure(figsize=(8, 6))
+        plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
+        plt.title('Service Requests by Status')
+        plt.xlabel('Service Status')
+        plt.ylabel('Number of Requests')
+        plt.savefig(os.path.join(chart_dir, 'professional_service_requests.png'))
+        plt.close()
+
+
+        # 2. Professional Ratings Chart
+        professional = Professional.query.filter_by(login_id = current_user.id).first()
+        low_count = 0
+        medium_count = 0
+        high_count = 0
+        if professional.ratings:
+            if professional.ratings < 3:
+                low_count += 1
+            elif 3 <= professional.ratings <= 4:
+                medium_count += 1
+            else:
+                high_count += 1
+
+        labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
+        sizes = [low_count, medium_count, high_count]
+        colors = ['lightcoral', 'lightskyblue', 'lightgreen']
+        plt.figure(figsize=(8, 6))
+        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        plt.title("Professional Ratings Distribution")
+        plt.axis('equal')
+        plt.savefig(os.path.join(chart_dir, 'professional_professional_ratings.png'))
+        plt.close()
+
+        return render_template(
+            "professional_summary.html",
+            service_request_chart='charts/professional_service_requests.png',
+            professional_ratings_chart='charts/professional_professional_ratings.png'
+        )
 
     # Customer Home Route
     @routes_bp.route('/home/customer')
