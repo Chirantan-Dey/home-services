@@ -24,11 +24,11 @@ class Professional(db.Model):
     experience = db.Column(db.Integer, nullable=False) 
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
-    login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
+    ratings = db.Column(db.Numeric(2, 1), nullable=True) #Ratings column added for Professional Model
+    remarks = db.Column(db.Text, nullable=True)
     is_approved = db.Column(db.Boolean, default=None, nullable=True)
-
+    login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
     service_requests = db.relationship('ServiceRequest', backref='professional', passive_deletes=True)
-
     
     def __repr__(self):
         
@@ -51,10 +51,10 @@ class Service(db.Model):
     service_name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)  
     base_price = db.Column(db.Numeric(10, 2), nullable=False)
-    status = db.Column(db.Enum('open', 'close', name='service_status'), default='open', nullable=False)  
-    reviews = db.Column(db.Text, nullable=True)
+    status = db.Column(db.Enum('open', 'close', name='service_status'), default='open', nullable=False)
+
     service_requests = db.relationship('ServiceRequest', backref='service', passive_deletes=True)
-  
+
 
     def __repr__(self):
         return f'<Service {self.service_name}>'
@@ -68,6 +68,5 @@ class ServiceRequest(db.Model):
     date_of_request = db.Column(db.DateTime(timezone=True), default=datetime.now, nullable=False)
     date_of_completion = db.Column(db.DateTime(timezone=True), nullable=True)
     service_status = db.Column(db.Enum('requested', 'assigned', 'closed', name='service_status'), default='requested', nullable=False)
-    remarks = db.Column(db.Text, nullable=True)
 
     

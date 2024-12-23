@@ -237,13 +237,13 @@ def register_routes(app,db):
         return render_template("professional_home.html")
 
     # Professional Search Route
-    @routes_bp.route('/professional/search')
+    @routes_bp.route('/search/professional')
     @login_required
     def professional_search():
         return render_template("professional_search.html")
 
     # Professional Summary Route
-    @routes_bp.route('/professional/summary')
+    @routes_bp.route('/summary/professional')
     @login_required
     def professional_summary():
         return render_template("professional_summary.html")
@@ -255,13 +255,13 @@ def register_routes(app,db):
         return render_template("customer_home.html")
 
     # Customer Search Route
-    @routes_bp.route('/customer/search')
+    @routes_bp.route('/search/customer')
     @login_required
     def customer_search():
         return render_template("customer_search.html")
 
     # Customer Summary Route
-    @routes_bp.route('/customer/summary')
+    @routes_bp.route('/summary/customer')
     @login_required
     def customer_summary():
         return render_template("customer_summary.html")

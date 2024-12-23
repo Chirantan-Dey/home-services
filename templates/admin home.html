@@ -32,6 +32,7 @@
                                 data-bs-target="#deleteServiceModal{{ service.id }}">Delete</button>
                         </td>
                     </tr>
+
                     <!-- Service Details Modal -->
                     <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1"
                         aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
@@ -48,7 +49,7 @@
                                     <p><strong>Description:</strong> {{ service.description }}</p>
                                     <p><strong>Base Price:</strong> {{ service.base_price }}</p>
                                     <p><strong>Status:</strong> {{ service.status }}</p>
-                                    <p><strong>Reviews:</strong> {{ service.reviews if service.reviews else 'N/A' }}</p>
+
 
                                 </div>
                             </div>
@@ -96,6 +97,7 @@
                                             <textarea class="form-control" id="reviews" name="reviews"
                                                 rows="3">{{ service.reviews }}</textarea>
                                         </div>
+
                                         <button type="submit" class="btn btn-primary">Save Changes</button>
                                     </form>
                                 </div>
@@ -146,6 +148,9 @@
                         <th scope="col">Experience (in Yrs.)</th>
                         <th scope="col">Service Name</th>
                         <th scope="col">Action</th>
+                        <th scope="col">Ratings</th>
+                        <th scope="col">Remarks</th>
+                        <th scope="col">Approved</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -158,26 +163,11 @@
                         <td>{{ professional.experience }}</td>
                         <td>{{ professional.service_name }}</td>
                         <td>
-                            {% if professional.is_approved == None %}
-                            <form method="POST"
-                                action="{{ url_for('routes_bp.approve_professional', professional_id=professional.id) }}"
-                                style="display: inline;">
-                                <button type="submit" class="btn btn-success">Approve</button>
-                            </form>
-                            <form method="POST"
-                                action="{{ url_for('routes_bp.reject_professional', professional_id=professional.id) }}"
-                                style="display: inline;">
-                                <button type="submit" class="btn btn-danger">Reject</button>
-                            </form>
-                            {% elif professional.is_approved == True %}
-                            <form method="POST"
-                                action="{{ url_for('routes_bp.delete_professional', professional_id=professional.id) }}">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                            {% else %}
-                            <span class="text-secondary">Rejected</span>
-                            {% endif %}
+                            <button class="btn btn-primary">View</button>
                         </td>
+                        <td>{{ professional.ratings if professional.ratings else 'N/A' }}</td>
+                        <td>{{ professional.remarks if professional.remarks else 'N/A' }}</td>
+                        <td>{{ professional.is_approved }}</td>
                     </tr>
                     <!-- Professional Modal -->
                     <div class="modal fade" id="professionalModal{{professional.id}}" tabindex="-1"
@@ -197,6 +187,11 @@
                                     <p><strong>Service:</strong> {{ professional.service_name }}</p>
                                     <p><strong>Address:</strong> {{ professional.address }}</p>
                                     <p><strong>Pincode:</strong> {{ professional.pincode }}</p>
+                                    <p><strong>Ratings:</strong> {{ professional.ratings if professional.ratings else
+                                        'N/A' }}</p>
+                                    <p><strong>Remarks:</strong> {{ professional.remarks if professional.remarks else
+                                        'N/A' }}</p>
+                                    <p><strong>Approved:</strong> {{ professional.is_approved }}</p>
 
                                 </div>
                             </div>

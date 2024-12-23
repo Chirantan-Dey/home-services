@@ -64,7 +64,7 @@
                                     <p><strong>Description:</strong> {{ service.description }}</p>
                                     <p><strong>Base Price:</strong> {{ service.base_price }}</p>
                                     <p><strong>Status:</strong> {{ service.status }}</p>
-                                    <p><strong>Reviews:</strong> {{ service.reviews if service.reviews else 'N/A' }}</p>
+
 
                                 </div>
                             </div>
@@ -86,6 +86,9 @@
                         <th scope="col">Experience (in Yrs.)</th>
                         <th scope="col">Service Name</th>
                         <th scope="col">Action</th>
+                        <th scope="col">Ratings</th>
+                        <th scope="col">Remarks</th>
+                        <th scope="col">Approved</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,6 +103,9 @@
                         <td>
                             <button class="btn btn-primary">View</button>
                         </td>
+                        <td>{{ professional.ratings if professional.ratings else 'N/A' }}</td>
+                        <td>{{ professional.remarks if professional.remarks else 'N/A' }}</td>
+                        <td>{{ professional.is_approved }}</td>
                     </tr>
                     <!-- Professional Modal -->
                     <div class="modal fade" id="professionalModal{{professional.id}}" tabindex="-1"
@@ -119,6 +125,11 @@
                                     <p><strong>Service:</strong> {{ professional.service_name }}</p>
                                     <p><strong>Address:</strong> {{ professional.address }}</p>
                                     <p><strong>Pincode:</strong> {{ professional.pincode }}</p>
+                                    <p><strong>Ratings:</strong> {{ professional.ratings if professional.ratings else
+                                        'N/A' }}</p>
+                                    <p><strong>Remarks:</strong> {{ professional.remarks if professional.remarks else
+                                        'N/A' }}</p>
+                                    <p><strong>Approved:</strong> {{ professional.is_approved }}</p>
 
                                 </div>
                             </div>
