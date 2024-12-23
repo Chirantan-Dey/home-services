@@ -225,7 +225,7 @@ def register_routes(app,db):
     @routes_bp.route('/summary/admin')
     @login_required
     def admin_summary():
-        # Chart directory
+         # Chart directory
         chart_dir = os.path.join(app.static_folder, 'charts')
 
         if not os.path.exists(chart_dir):
@@ -238,8 +238,14 @@ def register_routes(app,db):
             status = request.service_status
             status_counts[status] = status_counts.get(status, 0) + 1
 
-        statuses = list(status_counts.keys())
-        counts = list(status_counts.values())
+        # Update 'pending' to 'requested' for display purposes
+        if 'requested' in status_counts:
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+        else:
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+
 
         plt.figure(figsize=(8, 6))
         plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
@@ -257,11 +263,11 @@ def register_routes(app,db):
         high_count = 0
 
         for professional in professionals:
-            if professional.ratings:
+             if professional.ratings:
                 if professional.ratings < 3:
                     low_count += 1
                 elif 3 <= professional.ratings <= 4:
-                    medium_count += 1
+                   medium_count += 1
                 else:
                     high_count += 1
 
@@ -276,9 +282,9 @@ def register_routes(app,db):
         plt.close()
     
         return render_template(
-            "admin_summary.html",
+           "admin_summary.html",
             service_request_chart='charts/service_requests.png',
-            professional_ratings_chart='charts/professional_ratings.png'
+             professional_ratings_chart='charts/professional_ratings.png'
         )
     
     # Professional Home Route
@@ -286,34 +292,49 @@ def register_routes(app,db):
     @login_required
     def professional_home():
         professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
+        professional = Professional.query.get_or_404(professional_id)
         open_requests = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='requested').all()
         closed_requests = ServiceRequest.query.filter(ServiceRequest.professional_id==professional_id, ServiceRequest.service_status.in_(['assigned', 'closed'])).all()
 
         return render_template(
-            "professional_home.html",
+             "professional_home.html",
             open_requests = open_requests,
-            closed_requests = closed_requests
+            closed_requests = closed_requests,
+            professional = professional
         )
+    
+    @routes_bp.route('/professional/edit/<int:professional_id>', methods=['POST'])
+    @login_required
+    def edit_professional(professional_id):
+        professional = Professional.query.get_or_404(professional_id)
+        professional.fullname = request.form.get('full_name')
+        professional.experience = request.form.get('experience')
+        professional.address= request.form.get('address')
+        professional.pincode = request.form.get('pincode')
+        professional.ratings = request.form.get('ratings')
+        professional.remarks = request.form.get('remarks')
+        db.session.commit()
+        return redirect(url_for('routes_bp.professional_home'))
+
 
     @routes_bp.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
     @login_required
     def accept_service_request(request_id):
-        service_request = ServiceRequest.query.get_or_404(request_id)
-        service_request.service_status = 'assigned'
-        db.session.commit()
-        return redirect(url_for('routes_bp.professional_home'))
+         service_request = ServiceRequest.query.get_or_404(request_id)
+         service_request.service_status = 'assigned'
+         db.session.commit()
+         return redirect(url_for('routes_bp.professional_home'))
 
 
     @routes_bp.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
     @login_required
     def reject_service_request(request_id):
-        service_request = ServiceRequest.query.get_or_404(request_id)
-        service_request.service_status = 'closed'
-        db.session.commit()
-        return redirect(url_for('routes_bp.professional_home'))
+         service_request = ServiceRequest.query.get_or_404(request_id)
+         service_request.service_status = 'closed'
+         db.session.commit()
+         return redirect(url_for('routes_bp.professional_home'))
 
 
-    # Professional Search Route
     @routes_bp.route('/search/professional')
     @login_required
     def professional_search():
@@ -324,10 +345,10 @@ def register_routes(app,db):
             professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
             results= ServiceRequest.query.filter(ServiceRequest.professional_id == professional_id, ServiceRequest.service_status.ilike(search_term)).all()
         return render_template(
-        "professional_search.html",
-        search_term=search_term,
-        results=results
-        )
+           "professional_search.html",
+           search_term=search_term,
+           results=results
+         )
 
 
     # Professional Summary Route
@@ -338,7 +359,7 @@ def register_routes(app,db):
         chart_dir = os.path.join(app.static_folder, 'charts')
         if not os.path.exists(chart_dir):
             os.makedirs(chart_dir)
-        # Get current professional id
+         # Get current professional id
         professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
 
         # 1. Service Request Chart
@@ -347,10 +368,14 @@ def register_routes(app,db):
         for request in service_requests:
             status = request.service_status
             status_counts[status] = status_counts.get(status, 0) + 1
-
-        statuses = list(status_counts.keys())
-        counts = list(status_counts.values())
-
+        # Update 'pending' to 'requested' for display purposes
+        if 'requested' in status_counts:
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+        else:
+             statuses = list(status_counts.keys())
+             counts = list(status_counts.values())
+        
         plt.figure(figsize=(8, 6))
         plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
         plt.title('Service Requests by Status')
@@ -366,11 +391,11 @@ def register_routes(app,db):
         medium_count = 0
         high_count = 0
         if professional.ratings:
-            if professional.ratings < 3:
+             if professional.ratings < 3:
                 low_count += 1
-            elif 3 <= professional.ratings <= 4:
+             elif 3 <= professional.ratings <= 4:
                 medium_count += 1
-            else:
+             else:
                 high_count += 1
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
@@ -384,9 +409,9 @@ def register_routes(app,db):
         plt.close()
 
         return render_template(
-            "professional_summary.html",
+           "professional_summary.html",
             service_request_chart='charts/professional_service_requests.png',
-            professional_ratings_chart='charts/professional_professional_ratings.png'
+             professional_ratings_chart='charts/professional_professional_ratings.png'
         )
 
     # Customer Home Route

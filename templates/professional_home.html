@@ -5,6 +5,8 @@
 {% block content %}
 <section class="m-3">
     <div class="container">
+        <button type="button" class="btn btn-outline-info mb-3" data-bs-toggle="modal"
+            data-bs-target="#profileModal">View/Edit Profile</button>
         <h1>Open Service Requests</h1>
         <div class="table-responsive">
             <table class="table  table-striped table-bordered table-hover">
@@ -66,4 +68,51 @@
         </div>
     </div>
 </section>
+<!-- Professional Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">View/Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST"
+                    action="{{ url_for('routes_bp.edit_professional',professional_id=professional.id) }}">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="fullName" name="full_name"
+                            value="{{professional.fullname}}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="experience" class="form-label">Experience (in Years)</label>
+                        <input type="number" class="form-control" id="experience" name="experience"
+                            value="{{professional.experience}}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3"
+                            required>{{professional.address}}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pincode" class="form-label">Pincode</label>
+                        <input type="text" class="form-control" id="pincode" name="pincode"
+                            value="{{professional.pincode}}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ratings" class="form-label">Ratings</label>
+                        <input type="number" class="form-control" id="ratings" name="ratings"
+                            value="{{professional.ratings}}" step="0.1" min="0" max="5">
+                    </div>
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks"
+                            rows="3">{{professional.remarks}}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
