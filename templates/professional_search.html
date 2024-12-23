@@ -22,6 +22,7 @@
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
+                        <th scope="col">Customer ID</th>
                         <th scope="col">Requested Date</th>
                         <th scope="col">Status</th>
                     </tr>
@@ -30,6 +31,7 @@
                     {% for request in results %}
                     <tr>
                         <td>{{ request.id }}</td>
+                        <td>{{ request.customer_id }}</td>
                         <td>{{ request.date_of_request }}</td>
                         <td>{{ request.service_status }}</td>
                     </tr>

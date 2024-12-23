@@ -368,14 +368,13 @@ def register_routes(app,db):
         for request in service_requests:
             status = request.service_status
             status_counts[status] = status_counts.get(status, 0) + 1
-        # Update 'pending' to 'requested' for display purposes
+         # Update 'pending' to 'requested' for display purposes
         if 'requested' in status_counts:
             statuses = list(status_counts.keys())
             counts = list(status_counts.values())
         else:
-             statuses = list(status_counts.keys())
-             counts = list(status_counts.values())
-        
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
         plt.figure(figsize=(8, 6))
         plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
         plt.title('Service Requests by Status')
