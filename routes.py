@@ -145,16 +145,18 @@ def register_routes(app,db):
             return redirect(url_for('login'))
     
     
-    @routes_bp.route('/home/admin')
-    @login_required
-    def admin_home():
-        return render_template("admin_home.html")
+    
         
     # Admin Home Route
     @routes_bp.route('/home/admin')
     @login_required
     def admin_home():
-        return render_template("admin_home.html")
+        return render_template(
+            "admin_home.html",
+            services=Service.query.all(),
+            professionals=Professional.query.all(),
+            service_requests=ServiceRequest.query.all()
+            )
 
     # Admin Search Route
     @routes_bp.route('/admin/search')
