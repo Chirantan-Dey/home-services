@@ -1,7 +1,7 @@
 from app import db
 from models import Login,Admin,Professional,Customer,Service,ServiceRequest
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
-from flask_login import login_required, current_user
+from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -22,9 +22,22 @@ def register_routes(app,db):
             user = Login.query.filter_by(email=email).first()
             if user:
                 if check_password_hash(user.password, password):
-                    flash("Logged in!", category='success')
-                    login_user(user, remember=True)
-                    return redirect(url_for('home'))
+                    if user.user_type == 'professional':
+                        professional = Professional.query.filter_by(login_id=user.id).first()
+                        if professional and professional.is_approved is True:
+                            flash("Logged in!", category='success')
+                            login_user(user, remember=True)
+                            return redirect(url_for('home'))
+                        elif professional and professional.is_approved is False:
+                            flash('Your account has been rejected by admin.', category='error')
+                        else:
+                            flash('Your account is waiting for admin approval.', category='error')
+                    else:
+                        flash("Logged in!", category='success')
+                        login_user(user, remember=True)
+                        return redirect(url_for('home'))
+                    
+                    
                 else:
                     flash('Password is incorrect.', category='error')
             else:
@@ -43,7 +56,7 @@ def register_routes(app,db):
             experience = request.form.get("Experience")
             address = request.form.get("Address")
             pincode = request.form.get("Pincode")
-            email_exists = User.query.filter_by(email=email).first()
+            email_exists = Professional.query.filter_by(email=email).first()
             if email_exists:
                 flash('Email is already in use.', category='error')            
             else:
@@ -52,7 +65,7 @@ def register_routes(app,db):
                     email=email,
                     password=generate_password_hash(password, method='sha256')
                 )
-                db.session.add(new_user)
+                db.session.add(new_login)
                 db.session.commit()
                 new_professional = Professional(                    
                     full_name=full_name,
@@ -62,9 +75,8 @@ def register_routes(app,db):
                     pincode=pincode,
                     login_id=new_login.id
                 )
-                db.session.add(new_user)
-                db.session.commit()
-                login_user(new_user, remember=True)
+                db.session.add(new_professional)
+                db.session.commit()                
                 flash('User created!')
                 return redirect(url_for('home'))
         return render_template("professional_register.html",services=services)
@@ -77,7 +89,7 @@ def register_routes(app,db):
             full_name = request.form.get("FullName")
             address = request.form.get("Address")
             pincode = request.form.get("Pincode")
-            email_exists = User.query.filter_by(email=email).first()
+            email_exists = Customer.query.filter_by(email=email).first()
             if email_exists:
                 flash('Email is already in use.', category='error')            
             else:
@@ -86,7 +98,7 @@ def register_routes(app,db):
                     email=email,
                     password=generate_password_hash(password, method='sha256')
                 )
-                db.session.add(new_user)
+                db.session.add(new_login)
                 db.session.commit()
                 new_customer = Customer(                    
                     full_name=full_name,                    
@@ -94,9 +106,9 @@ def register_routes(app,db):
                     pincode=pincode,
                     login_id=new_login.id
                 )
-                db.session.add(new_user)
+                db.session.add(new_customer)
                 db.session.commit()
-                login_user(new_user, remember=True)
+                login_user(new_login, remember=True)
                 flash('User created!')
                 return redirect(url_for('home'))
         return render_template("customer_register.html")
@@ -183,7 +195,7 @@ def register_routes(app,db):
         return redirect(url_for('routes_bp.admin_home'))
 
     
-    @routes_bp.route('/summary/admin', methods=['GET'])
+    @routes_bp.route('/search/admin', methods=['GET'])
     @login_required
     def admin_search():
         search_type = request.args.get('search_type', 'all')

@@ -32,7 +32,6 @@
                                 data-bs-target="#deleteServiceModal{{ service.id }}">Delete</button>
                         </td>
                     </tr>
-
                     <!-- Service Details Modal -->
                     <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1"
                         aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
@@ -159,7 +158,25 @@
                         <td>{{ professional.experience }}</td>
                         <td>{{ professional.service_name }}</td>
                         <td>
-                            <button class="btn btn-primary">View</button>
+                            {% if professional.is_approved == None %}
+                            <form method="POST"
+                                action="{{ url_for('routes_bp.approve_professional', professional_id=professional.id) }}"
+                                style="display: inline;">
+                                <button type="submit" class="btn btn-success">Approve</button>
+                            </form>
+                            <form method="POST"
+                                action="{{ url_for('routes_bp.reject_professional', professional_id=professional.id) }}"
+                                style="display: inline;">
+                                <button type="submit" class="btn btn-danger">Reject</button>
+                            </form>
+                            {% elif professional.is_approved == True %}
+                            <form method="POST"
+                                action="{{ url_for('routes_bp.delete_professional', professional_id=professional.id) }}">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            {% else %}
+                            <span class="text-secondary">Rejected</span>
+                            {% endif %}
                         </td>
                     </tr>
                     <!-- Professional Modal -->

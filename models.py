@@ -25,6 +25,8 @@ class Professional(db.Model):
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
     login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
+    is_approved = db.Column(db.Boolean, default=None, nullable=True)
+
     service_requests = db.relationship('ServiceRequest', backref='professional', passive_deletes=True)
 
     
