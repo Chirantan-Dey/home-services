@@ -6,6 +6,8 @@
 <section class="m-3">
     <div class="container">
         <h1>Services</h1>
+        <a href="{{ url_for('routes_bp.new_service') }}" target="_blank" class="btn btn-outline-primary mb-3">+New
+            Service</a>
         <div class="table-responsive">
             <table class="table  table-striped table-bordered table-hover">
                 <thead>
@@ -19,20 +21,19 @@
                 <tbody>
                     {% for service in services %}
                     <tr>
-                        <td>
-                            <button type="button" class="btn btn-link" data-bs-toggle="modal"
-                                data-bs-target="#serviceModal{{service.id}}">
-                                {{ service.id }}
-                            </button>
-                        </td>
-                        <td>{{ service.name }}</td>
+                        <td><button type="button" class="btn btn-link" data-bs-toggle="modal"
+                                data-bs-target="#serviceModal{{service.id}}">{{ service.id }}</button></td>
+                        <td>{{ service.service_name }}</td>
                         <td>{{ service.base_price }}</td>
                         <td>
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
+                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#editServiceModal{{ service.id }}">Edit</button>
+                            <button class="btn btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteServiceModal{{ service.id }}">Delete</button>
                         </td>
                     </tr>
-                    <!-- Service Modal -->
+
+                    <!-- Service Details Modal -->
                     <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1"
                         aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
                         <div class="modal-dialog">
@@ -50,6 +51,80 @@
                                     <p><strong>Status:</strong> {{ service.status }}</p>
                                     <p><strong>Reviews:</strong> {{ service.reviews if service.reviews else 'N/A' }}</p>
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Edit Service Modal-->
+                    <div class="modal fade" id="editServiceModal{{ service.id }}" tabindex="-1"
+                        aria-labelledby="editServiceModalLabel{{ service.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editServiceModalLabel{{ service.id }}">Edit Service</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST"
+                                        action="{{ url_for('routes_bp.edit_service', service_id=service.id) }}">
+                                        <div class="mb-3">
+                                            <label for="serviceName" class="form-label">Service Name</label>
+                                            <input type="text" class="form-control" id="serviceName" name="service_name"
+                                                value="{{ service.service_name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="serviceDescription" class="form-label">Description</label>
+                                            <textarea class="form-control" id="serviceDescription" name="description"
+                                                rows="3" required>{{ service.description }}</textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="basePrice" class="form-label">Base Price</label>
+                                            <input type="number" class="form-control" id="basePrice" name="base_price"
+                                                value="{{ service.base_price }}" step="0.01" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-select" name="status" required>
+                                                <option value="open" {% if service.status=='open' %}selected{% endif %}>
+                                                    Open</option>
+                                                <option value="close" {% if service.status=='close' %}selected{% endif
+                                                    %}>Close</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="reviews" class="form-label">Reviews</label>
+                                            <textarea class="form-control" id="reviews" name="reviews"
+                                                rows="3">{{ service.reviews }}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Delete Service Modal -->
+                    <div class="modal fade" id="deleteServiceModal{{ service.id }}" tabindex="-1"
+                        aria-labelledby="deleteServiceModalLabel{{ service.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteServiceModalLabel{{ service.id }}">Confirm Delete
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete service: <strong>{{ service.service_name
+                                            }}</strong>?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <form method="POST"
+                                        action="{{ url_for('routes_bp.delete_service', service_id=service.id) }}">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -77,13 +152,10 @@
                 <tbody>
                     {% for professional in professionals %}
                     <tr>
-                        <td>
-                            <button type="button" class="btn btn-link" data-bs-toggle="modal"
-                                data-bs-target="#professionalModal{{professional.id}}">
-                                {{ professional.id }}
-                            </button>
+                        <td><button type="button" class="btn btn-link" data-bs-toggle="modal"
+                                data-bs-target="#professionalModal{{professional.id}}">{{ professional.id }}</button>
                         </td>
-                        <td>{{ professional.name }}</td>
+                        <td>{{ professional.fullname }}</td>
                         <td>{{ professional.experience }}</td>
                         <td>{{ professional.service_name }}</td>
                         <td>
@@ -108,6 +180,7 @@
                                     <p><strong>Service:</strong> {{ professional.service_name }}</p>
                                     <p><strong>Address:</strong> {{ professional.address }}</p>
                                     <p><strong>Pincode:</strong> {{ professional.pincode }}</p>
+
                                 </div>
                             </div>
                         </div>
@@ -135,9 +208,9 @@
                     {% for request in service_requests %}
                     <tr>
                         <td>{{ request.id }}</td>
-                        <td>{{ request.assigned_professional }}</td>
-                        <td>{{ request.requested_date }}</td>
-                        <td>{{ request.status }}</td>
+                        <td>{{ request.professional.fullname if request.professional else 'N/A' }}</td>
+                        <td>{{ request.date_of_request }}</td>
+                        <td>{{ request.service_status }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

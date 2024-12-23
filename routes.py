@@ -157,19 +157,67 @@ def register_routes(app,db):
             professionals=Professional.query.all(),
             service_requests=ServiceRequest.query.all()
             )
+    @routes_bp.route('/admin/services/new')
+    @login_required
+    def new_service():
+        return render_template('services.html')
 
-    # Admin Search Route
-    @routes_bp.route('/admin/search')
+    @routes_bp.route('/admin/services/edit/<int:service_id>', methods=['POST'])
+    @login_required
+    def edit_service(service_id):
+        service = Service.query.get_or_404(service_id)
+        service.service_name = request.form.get('service_name')
+        service.description = request.form.get('description')
+        service.base_price = request.form.get('base_price')
+        service.status = request.form.get('status')
+        service.reviews= request.form.get('reviews')
+        db.session.commit()
+        return redirect(url_for('routes_bp.admin_home'))
+
+    @routes_bp.route('/admin/services/delete/<int:service_id>', methods=['POST'])
+    @login_required
+    def delete_service(service_id):
+        service = Service.query.get_or_404(service_id)
+        db.session.delete(service)
+        db.session.commit()
+        return redirect(url_for('routes_bp.admin_home'))
+
+    
+    @routes_bp.route('/summary/admin', methods=['GET'])
     @login_required
     def admin_search():
-        return render_template("admin_search.html")
+        search_type = request.args.get('search_type', 'all')
+        search_term = request.args.get('search_term', '')
+        results = []    
+        if search_term:
+            search_term = f"%{search_term}%"       
+            if search_type == 'all':
+                services = Service.query.filter(Service.service_name.ilike(search_term)).all()
+                professionals = Professional.query.filter(Professional.fullname.ilike(search_term)).all()
+                service_requests = ServiceRequest.query.join(Professional, ServiceRequest.professional_id == Professional.id).filter(Professional.fullname.ilike(search_term)).all()
+                
+                results.extend(services)
+                results.extend(professionals)
+                results.extend(service_requests)
+            elif search_type == 'service':
+                results = Service.query.filter(Service.service_name.ilike(search_term)).all()
+            elif search_type == 'professional':
+                results = Professional.query.filter(Professional.fullname.ilike(search_term)).all()
+            elif search_type == 'service_request':
+                    results = ServiceRequest.query.join(Professional, ServiceRequest.professional_id == Professional.id).filter(Professional.fullname.ilike(search_term)).all()
+        return render_template(
+            "admin_search.html",
+            search_type=search_type,
+            search_term=request.args.get('search_term', ''),
+            results=results
+            )
 
     # Admin Summary Route
-    @routes_bp.route('/admin/summary')
+    @routes_bp.route('/summary/admin')
     @login_required
     def admin_summary():
-        return render_template("admin_summary.html")    
-            
+        return render_template("admin_summary.html")
+
     # Professional Home Route
     @routes_bp.route('/home/professional')
     @login_required
