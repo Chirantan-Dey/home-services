@@ -1,0 +1,130 @@
+{% extends "base2.html" %}
+
+{% block title %}Customer Dashboard{% endblock %}
+
+{% block content %}
+<section class="m-3">
+    <div class="container">
+        <button type="button" class="btn btn-outline-info mb-3" data-bs-toggle="modal" data-bs-target="#profileModal">View/Edit Profile</button>
+        <h1>Looking For?</h1>
+        <div class="row">
+            {% for service in services %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                         <h5 class="card-title">{{ service.service_name }}</h5>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#serviceModal{{service.id}}"> View Professionals</button>
+                    </div>
+                </div>
+            </div>
+              <!-- Service Modal -->
+                    <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1" aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="serviceModalLabel{{service.id}}">Best {{ service.service_name }} Packages</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                 <div class="modal-body">
+                                     <table class="table">
+                                        <thead>
+                                            <tr>
+                                                 <th>Name</th>
+                                                  <th>Experience</th>
+                                                  <th>Actions</th>
+                                             </tr>
+                                       </thead>
+                                    <tbody>
+                                   {% for professional in professionals %}
+                                     {% if professional.service_id == service.id %}
+                                        <tr>
+                                         
+                                            <td>{{professional.fullname}}</td>
+                                             <td>{{professional.experience}}</td>
+                                             <td>
+                                             <form method="POST" action="{{ url_for('routes_bp.book_service_request',service_id=service.id,professional_id=professional.id) }}">
+                                                 <button type="submit" class="btn btn-success btn-sm">Book</button>
+                                                </form>
+                                                </td>
+                                         </tr>
+                                        {% endif %}
+                                   {% endfor %}
+                                        </tbody>
+                                    </table>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+             {% endfor %}
+        </div>
+    </div>
+</section>
+<section class="m-3">
+    <div class="container">
+        <h1>Service History</h1>
+         <div class="table-responsive">
+            <table class="table  table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                         <th scope="col">Professional ID</th>
+                        <th scope="col">Requested Date</th>
+                        <th scope="col">Status</th>
+                       <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in service_requests %}
+                    <tr>
+                        <td>{{ request.id }}</td>
+                         <td>{{ request.professional_id }}</td>
+                        <td>{{ request.date_of_request }}</td>
+                        <td>{{ request.service_status }}</td>
+                         <td>
+                            {% if request.service_status == 'assigned' %}
+                               <form method="POST" action="{{ url_for('routes_bp.customer_close_request',request_id=request.id) }}" style="display:inline">
+                                   <button type="submit" class="btn btn-primary btn-sm">Close It?</button>
+                               </form>
+                            {% elif request.service_status == 'requested'%}
+                                Requested
+                             {% elif request.service_status == 'closed'%}
+                                   Closed
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </div>
+    </div>
+</section>
+    <!-- Customer Profile Modal -->
+   <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">View/Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                      <form method="POST" action="{{ url_for('routes_bp.edit_customer',customer_id=customer.id) }}">
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" name="full_name" value="{{customer.fullname}}" required>
+                        </div>
+                         <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address"  rows="3" required>{{customer.address}}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pincode" class="form-label">Pincode</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" value="{{customer.pincode}}" required>
+                        </div>
+                       
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

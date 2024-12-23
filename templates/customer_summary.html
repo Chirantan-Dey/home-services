@@ -1,0 +1,17 @@
+{% extends "base2.html" %}
+
+{% block title %}Customer Summary{% endblock %}
+
+{% block content %}
+<section class="m-3">
+    <div class="container">
+        <h1>Customer Summary</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Service Request Chart</h2>
+                <img src="{{ url_for('static', filename=service_request_chart) }}" alt="Service Request Chart" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

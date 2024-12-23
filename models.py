@@ -67,6 +67,6 @@ class ServiceRequest(db.Model):
     professional_id = db.Column(db.Integer, ForeignKey('professionals.id'), nullable=False, ondelete="CASCADE")
     date_of_request = db.Column(db.DateTime(timezone=True), default=datetime.now, nullable=False)
     date_of_completion = db.Column(db.DateTime(timezone=True), nullable=True)
-    service_status = db.Column(db.Enum('requested', 'assigned', 'closed', name='service_status'), default='requested', nullable=False)
+    service_status = db.Column(db.String(100), default='Requested', nullable=False)
 
     

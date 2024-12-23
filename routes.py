@@ -5,6 +5,7 @@ from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime
 
 routes_bp = Blueprint("routes", __name__)
 
@@ -418,16 +419,101 @@ def register_routes(app,db):
     @routes_bp.route('/home/customer')
     @login_required
     def customer_home():
-        return render_template("customer_home.html")
+         customer_id = Customer.query.filter_by(login_id = current_user.id).first().id
+         services = Service.query.all()
+         customer = Customer.query.get_or_404(customer_id)
+         service_requests = ServiceRequest.query.filter_by(customer_id = customer_id).all()
 
-    # Customer Search Route
+         return render_template(
+             "customer_home.html",
+             services = services,
+             service_requests= service_requests,
+             customer = customer
+         )
+
+
+    @routes_bp.route('/customer/book/<int:service_id>/<int:professional_id>', methods=['POST'])
+    @login_required
+    def book_service_request(service_id,professional_id):
+       customer_id = Customer.query.filter_by(login_id=current_user.id).first().id
+
+       new_service_request = ServiceRequest(
+        service_id = service_id,
+        customer_id = customer_id,
+        professional_id = professional_id,
+        date_of_request = datetime.now(),
+        service_status='requested'
+        )
+       db.session.add(new_service_request)
+       db.session.commit()
+
+       return redirect(url_for('routes_bp.customer_home'))
+   
+    @routes_bp.route('/customer/close/<int:request_id>', methods=['POST'])
+    @login_required
+    def customer_close_request(request_id):
+         service_request = ServiceRequest.query.get_or_404(request_id)
+         service_request.service_status = 'closed'
+         db.session.commit()
+         return redirect(url_for('routes_bp.customer_home'))
+
+
     @routes_bp.route('/search/customer')
     @login_required
     def customer_search():
-        return render_template("customer_search.html")
+         search_term = request.args.get('search_term', '')
+         services = Service.query.all()
+         results = []
+         if search_term:
+            search_term = f"%{search_term}%"
+            results = Service.query.filter(Service.service_name.ilike(search_term)).all()
+         return render_template(
+            "customer_search.html",
+            search_term= search_term,
+            services = services,
+            results=results
+          )
 
     # Customer Summary Route
     @routes_bp.route('/summary/customer')
     @login_required
     def customer_summary():
-        return render_template("customer_summary.html")
+         # Chart directory
+        chart_dir = os.path.join(app.static_folder, 'charts')
+        if not os.path.exists(chart_dir):
+            os.makedirs(chart_dir)
+        customer_id= Customer.query.filter_by(login_id=current_user.id).first().id
+         # 1. Service Request Chart
+        service_requests = ServiceRequest.query.filter_by(customer_id=customer_id).all()
+        status_counts = {}
+        for req in service_requests:
+            status = req.service_status
+            status_counts[status] = status_counts.get(status, 0) + 1
+        if 'requested' in status_counts:
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+        else:
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+        plt.figure(figsize=(8, 6))
+        plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
+        plt.title('Service Requests by Status')
+        plt.xlabel('Service Status')
+        plt.ylabel('Number of Requests')
+        plt.savefig(os.path.join(chart_dir, 'customer_service_requests.png'))
+        plt.close()
+         
+        return render_template(
+            "customer_summary.html",
+             service_request_chart='charts/customer_service_requests.png',
+        )
+    
+    @routes_bp.route('/customer/edit/<int:customer_id>', methods=['POST'])
+    @login_required
+    def edit_customer(customer_id):
+         customer = Customer.query.get_or_404(customer_id)
+         customer.fullname = request.form.get('full_name')
+         customer.address = request.form.get('address')
+         customer.pincode = request.form.get('pincode')
+         db.session.commit()
+         return redirect(url_for('routes_bp.customer_home'))
