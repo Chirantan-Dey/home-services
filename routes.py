@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
@@ -227,7 +227,7 @@ def register_routes(app,db):
     @routes_bp.route('/summary/admin')
     @login_required
     def admin_summary():
-         # Chart directory
+        # Chart directory
         chart_dir = os.path.join(app.static_folder, 'charts')
 
         if not os.path.exists(chart_dir):
@@ -265,11 +265,11 @@ def register_routes(app,db):
         high_count = 0
 
         for professional in professionals:
-             if professional.ratings:
+            if professional.ratings:
                 if professional.ratings < 3:
                     low_count += 1
                 elif 3 <= professional.ratings <= 4:
-                   medium_count += 1
+                    medium_count += 1
                 else:
                     high_count += 1
 
@@ -284,9 +284,9 @@ def register_routes(app,db):
         plt.close()
     
         return render_template(
-           "admin_summary.html",
+            "admin_summary.html",
             service_request_chart='charts/service_requests.png',
-             professional_ratings_chart='charts/professional_ratings.png'
+            professional_ratings_chart='charts/professional_ratings.png'
         )
     
     # Professional Home Route
@@ -299,7 +299,7 @@ def register_routes(app,db):
         closed_requests = ServiceRequest.query.filter(ServiceRequest.professional_id==professional_id, ServiceRequest.service_status.in_(['assigned', 'closed'])).all()
 
         return render_template(
-             "professional_home.html",
+            "professional_home.html",
             open_requests = open_requests,
             closed_requests = closed_requests,
             professional = professional
@@ -322,19 +322,19 @@ def register_routes(app,db):
     @routes_bp.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
     @login_required
     def accept_service_request(request_id):
-         service_request = ServiceRequest.query.get_or_404(request_id)
-         service_request.service_status = 'assigned'
-         db.session.commit()
-         return redirect(url_for('routes_bp.professional_home'))
+        service_request = ServiceRequest.query.get_or_404(request_id)
+        service_request.service_status = 'assigned'
+        db.session.commit()
+        return redirect(url_for('routes_bp.professional_home'))
 
 
     @routes_bp.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
     @login_required
     def reject_service_request(request_id):
-         service_request = ServiceRequest.query.get_or_404(request_id)
-         service_request.service_status = 'closed'
-         db.session.commit()
-         return redirect(url_for('routes_bp.professional_home'))
+        service_request = ServiceRequest.query.get_or_404(request_id)
+        service_request.service_status = 'closed'
+        db.session.commit()
+        return redirect(url_for('routes_bp.professional_home'))
 
 
     @routes_bp.route('/search/professional')
@@ -347,10 +347,10 @@ def register_routes(app,db):
             professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
             results= ServiceRequest.query.filter(ServiceRequest.professional_id == professional_id, ServiceRequest.service_status.ilike(search_term)).all()
         return render_template(
-           "professional_search.html",
-           search_term=search_term,
-           results=results
-         )
+        "professional_search.html",
+        search_term=search_term,
+        results=results
+        )
 
 
     # Professional Summary Route
@@ -361,7 +361,7 @@ def register_routes(app,db):
         chart_dir = os.path.join(app.static_folder, 'charts')
         if not os.path.exists(chart_dir):
             os.makedirs(chart_dir)
-         # Get current professional id
+        # Get current professional id
         professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
 
         # 1. Service Request Chart
@@ -375,9 +375,9 @@ def register_routes(app,db):
             statuses = list(status_counts.keys())
             counts = list(status_counts.values())
         else:
-             statuses = list(status_counts.keys())
-             counts = list(status_counts.values())
-        
+            statuses = list(status_counts.keys())
+            counts = list(status_counts.values())
+    
         plt.figure(figsize=(8, 6))
         plt.bar(statuses, counts, color=['skyblue', 'lightgreen', 'salmon'])
         plt.title('Service Requests by Status')
@@ -393,11 +393,11 @@ def register_routes(app,db):
         medium_count = 0
         high_count = 0
         if professional.ratings:
-             if professional.ratings < 3:
+            if professional.ratings < 3:
                 low_count += 1
-             elif 3 <= professional.ratings <= 4:
+            elif 3 <= professional.ratings <= 4:
                 medium_count += 1
-             else:
+            else:
                 high_count += 1
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
@@ -411,80 +411,80 @@ def register_routes(app,db):
         plt.close()
 
         return render_template(
-           "professional_summary.html",
+            "professional_summary.html",
             service_request_chart='charts/professional_service_requests.png',
-             professional_ratings_chart='charts/professional_professional_ratings.png'
+            professional_ratings_chart='charts/professional_professional_ratings.png'
         )
 
     # Customer Home Route
     @routes_bp.route('/home/customer')
     @login_required
     def customer_home():
-         customer_id = Customer.query.filter_by(login_id = current_user.id).first().id
-         services = Service.query.all()
-         customer = Customer.query.get_or_404(customer_id)
-         service_requests = ServiceRequest.query.filter_by(customer_id = customer_id).all()
+        customer_id = Customer.query.filter_by(login_id = current_user.id).first().id
+        services = Service.query.all()
+        customer = Customer.query.get_or_404(customer_id)
+        service_requests = ServiceRequest.query.filter_by(customer_id = customer_id).all()
 
-         return render_template(
-             "customer_home.html",
-             services = services,
-             service_requests= service_requests,
-             customer = customer
-         )
+        return render_template(
+            "customer_home.html",
+            services = services,
+            service_requests= service_requests,
+            customer = customer
+        )
 
 
     @routes_bp.route('/customer/book/<int:service_id>/<int:professional_id>', methods=['POST'])
     @login_required
     def book_service_request(service_id,professional_id):
-       customer_id = Customer.query.filter_by(login_id=current_user.id).first().id
+        customer_id = Customer.query.filter_by(login_id=current_user.id).first().id
 
-       new_service_request = ServiceRequest(
+        new_service_request = ServiceRequest(
         service_id = service_id,
         customer_id = customer_id,
         professional_id = professional_id,
         date_of_request = datetime.now(),
         service_status='requested'
         )
-       db.session.add(new_service_request)
-       db.session.commit()
+        db.session.add(new_service_request)
+        db.session.commit()
 
-       return redirect(url_for('routes_bp.customer_home'))
-   
+        return redirect(url_for('routes_bp.customer_home'))
+
     @routes_bp.route('/customer/close/<int:request_id>', methods=['POST'])
     @login_required
     def customer_close_request(request_id):
-         service_request = ServiceRequest.query.get_or_404(request_id)
-         service_request.service_status = 'closed'
-         db.session.commit()
-         return redirect(url_for('routes_bp.customer_home'))
+        service_request = ServiceRequest.query.get_or_404(request_id)
+        service_request.service_status = 'closed'
+        db.session.commit()
+        return redirect(url_for('routes_bp.customer_home'))
 
 
     @routes_bp.route('/search/customer')
     @login_required
     def customer_search():
-         search_term = request.args.get('search_term', '')
-         services = Service.query.all()
-         results = []
-         if search_term:
+        search_term = request.args.get('search_term', '')
+        services = Service.query.all()
+        results = []
+        if search_term:
             search_term = f"%{search_term}%"
             results = Service.query.filter(Service.service_name.ilike(search_term)).all()
-         return render_template(
+        return render_template(
             "customer_search.html",
             search_term= search_term,
             services = services,
             results=results
-          )
+        )
 
     # Customer Summary Route
     @routes_bp.route('/summary/customer')
     @login_required
     def customer_summary():
-         # Chart directory
+        # Chart directory
         chart_dir = os.path.join(app.static_folder, 'charts')
         if not os.path.exists(chart_dir):
             os.makedirs(chart_dir)
         customer_id= Customer.query.filter_by(login_id=current_user.id).first().id
-         # 1. Service Request Chart
+        # 1. Service Request Chart
         service_requests = ServiceRequest.query.filter_by(customer_id=customer_id).all()
         status_counts = {}
         for req in service_requests:
@@ -503,18 +503,18 @@ def register_routes(app,db):
         plt.ylabel('Number of Requests')
         plt.savefig(os.path.join(chart_dir, 'customer_service_requests.png'))
         plt.close()
-         
+        
         return render_template(
             "customer_summary.html",
-             service_request_chart='charts/customer_service_requests.png',
+            service_request_chart='charts/customer_service_requests.png',
         )
     
     @routes_bp.route('/customer/edit/<int:customer_id>', methods=['POST'])
     @login_required
     def edit_customer(customer_id):
-         customer = Customer.query.get_or_404(customer_id)
-         customer.fullname = request.form.get('full_name')
-         customer.address = request.form.get('address')
-         customer.pincode = request.form.get('pincode')
-         db.session.commit()
-         return redirect(url_for('routes_bp.customer_home'))
+        customer = Customer.query.get_or_404(customer_id)
+        customer.fullname = request.form.get('full_name')
+        customer.address = request.form.get('address')
+        customer.pincode = request.form.get('pincode')
+        db.session.commit()
+        return redirect(url_for('routes_bp.customer_home'))
