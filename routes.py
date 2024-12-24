@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
@@ -6,6 +6,33 @@ import os
 from datetime import datetime
 from models import Login,Admin,Professional,Customer,Service,ServiceRequest
 from app import db
+from werkzeug.security import generate_password_hash
+
+def create_admin_user(db):
+    admin_email = "chiru1"
+    admin_password = "chiru"
+    admin_exists = Login.query.filter_by(email=admin_email).first()
+    if not admin_exists:
+        new_login = Login(
+            user_type='admin',
+            email=admin_email,
+            password=generate_password_hash(admin_password, method='sha256')
+        )
+        db.session.add(new_login)
+        db.session.commit()
+        new_admin = Admin(
+            login_id=new_login.id,
+            full_name="Chiru Admin",
+            address="Admin Address",
+            pincode="123456"
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+        print("Admin user created.")
+    else:
+        print("Admin user already exists.")
+
+
 
 
 
