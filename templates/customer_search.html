@@ -6,67 +6,72 @@
 <section class="m-3">
     <div class="container">
         <h1>Search Services</h1>
-        <form method="GET" action="{{ url_for('routes_bp.customer_search') }}" class="mb-3">
+        <form method="GET" action="{{ url_for('customer_search') }}" class="mb-3">
             <div class="input-group">
-                 <input type="text" class="form-control" name="search_term" placeholder="Enter service name" value="{{ search_term }}">
-                 <button type="submit" class="btn btn-primary">Search</button>
+                <input type="text" class="form-control" name="search_term" placeholder="Enter service name"
+                    value="{{ search_term }}">
+                <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </form>
         {% if results %}
-        
-             <div class="row">
-                  {% for service in results %}
-                    <div class="col-md-3 mb-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                 <h5 class="card-title">{{ service.service_name }}</h5>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#serviceModal{{service.id}}"> View Professionals</button>
-                            </div>
+
+        <div class="row">
+            {% for service in results %}
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ service.service_name }}</h5>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#serviceModal{{service.id}}"> View Professionals</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Service Modal -->
+            <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1"
+                aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="serviceModalLabel{{service.id}}">Best {{ service.service_name }}
+                                Packages</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                   </div>
-                      <!-- Service Modal -->
-                    <div class="modal fade" id="serviceModal{{service.id}}" tabindex="-1" aria-labelledby="serviceModalLabel{{service.id}}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="serviceModalLabel{{service.id}}">Best {{ service.service_name }} Packages</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                 <div class="modal-body">
-                                     <table class="table">
-                                        <thead>
-                                            <tr>
-                                                 <th>Name</th>
-                                                  <th>Experience</th>
-                                                  <th>Actions</th>
-                                             </tr>
-                                       </thead>
-                                    <tbody>
-                                   {% for professional in professionals %}
-                                     {% if professional.service_id == service.id %}
-                                        <tr>
-                                         
-                                            <td>{{professional.fullname}}</td>
-                                             <td>{{professional.experience}}</td>
-                                             <td>
-                                             <form method="POST" action="{{ url_for('routes_bp.book_service_request',service_id=service.id,professional_id=professional.id) }}">
-                                                 <button type="submit" class="btn btn-success btn-sm">Book</button>
-                                                </form>
-                                                </td>
-                                         </tr>
-                                        {% endif %}
-                                   {% endfor %}
-                                        </tbody>
-                                    </table>
-                                 </div>
-                            </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Experience</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for professional in professionals %}
+                                    {% if professional.service_id == service.id %}
+                                    <tr>
+
+                                        <td>{{professional.fullname}}</td>
+                                        <td>{{professional.experience}}</td>
+                                        <td>
+                                            <form method="POST"
+                                                action="{{ url_for('book_service_request',service_id=service.id,professional_id=professional.id) }}">
+                                                <button type="submit" class="btn btn-success btn-sm">Book</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                {% endfor %}
+                </div>
             </div>
-         {% elif search_term %}
-            <p>No results found for "{{ search_term }}".</p>
-         {% endif %}
+            {% endfor %}
         </div>
+        {% elif search_term %}
+        <p>No results found for "{{ search_term }}".</p>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}

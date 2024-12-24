@@ -2,29 +2,28 @@ from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 from datetime import datetime
 from models import Login,Admin,Professional,Customer,Service,ServiceRequest
 from app import db
-from werkzeug.security import generate_password_hash
+
 
 def create_admin_user(db):
-    admin_email = "chiru1"
+    admin_email = "chiru1@gmail.com"
     admin_password = "chiru"
     admin_exists = Login.query.filter_by(email=admin_email).first()
     if not admin_exists:
         new_login = Login(
             user_type='admin',
             email=admin_email,
-            password=generate_password_hash(admin_password, method='sha256')
+            password=generate_password_hash(admin_password, method='pbkdf2:sha256')
         )
         db.session.add(new_login)
         db.session.commit()
         new_admin = Admin(
-            login_id=new_login.id,
-            full_name="Chiru Admin",
-            address="Admin Address",
-            pincode="123456"
+        name='Chiru',
+        login_id=new_login.id        
         )
         db.session.add(new_admin)
         db.session.commit()
@@ -89,7 +88,7 @@ def register_routes(app,db):
                 new_login = Login(
                     user_type='professional',
                     email=email,
-                    password=generate_password_hash(password, method='sha256')
+                    password=generate_password_hash(password, method='pbkdf2:sha256')
                 )
                 db.session.add(new_login)
                 db.session.commit()
@@ -115,14 +114,14 @@ def register_routes(app,db):
             full_name = request.form.get("FullName")
             address = request.form.get("Address")
             pincode = request.form.get("Pincode")
-            email_exists = Customer.query.filter_by(email=email).first()
+            email_exists = Login.query.filter_by(email=email).first()
             if email_exists:
                 flash('Email is already in use.', category='error')            
             else:
                 new_login = Login(
                     user_type='customer',
                     email=email,
-                    password=generate_password_hash(password, method='sha256')
+                    password=generate_password_hash(password, method='pbkdf2:sha256')
                 )
                 db.session.add(new_login)
                 db.session.commit()
@@ -302,6 +301,7 @@ def register_routes(app,db):
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
         sizes = [low_count, medium_count, high_count]
+        sizes = [0 if np.isnan(size) else size for size in sizes]
         colors = ['lightcoral', 'lightskyblue', 'lightgreen']
         plt.figure(figsize=(8, 6))
         plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
@@ -429,6 +429,7 @@ def register_routes(app,db):
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
         sizes = [low_count, medium_count, high_count]
+        sizes = [0 if np.isnan(size) else size for size in sizes]
         colors = ['lightcoral', 'lightskyblue', 'lightgreen']
         plt.figure(figsize=(8, 6))
         plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)

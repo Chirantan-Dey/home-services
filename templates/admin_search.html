@@ -6,7 +6,7 @@
 <section class="m-3">
     <div class="container">
         <h1>Search</h1>
-        <form method="GET" action="{{ url_for('routes_bp.admin_search') }}" class="mb-3">
+        <form method="GET" action="{{ url_for('admin_search') }}" class="mb-3">
             <div class="input-group">
                 <select class="form-select" name="search_type">
                     <option value="all" {% if search_type=='all' %}selected{% endif %}>All</option>

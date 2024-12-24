@@ -26,6 +26,8 @@ def create_app():
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        from routes import create_admin_user
+        create_admin_user(db)
     
     migrate=Migrate(app,db)
 
@@ -41,4 +43,3 @@ def create_app():
     from routes import register_routes
     register_routes(app,db)
     return app
-
