@@ -1,6 +1,6 @@
-from . import db
+from app import db
 from flask_login import UserMixin
-from sqlalchemy.sql import func,ForeignKey
+from sqlalchemy import func,ForeignKey
 from datetime import datetime
 class Login(db.Model,UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -12,7 +12,7 @@ class Login(db.Model,UserMixin):
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
-    login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
+    login_id = db.Column(db.Integer, db.ForeignKey('login.id'))
     
     def __repr__(self):
         return f"<Admin {self.name}>"
@@ -20,14 +20,14 @@ class Admin(db.Model):
 class Professional(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)    
     fullname = db.Column(db.String(100), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), ondelete="CASCADE")  
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id', ondelete="CASCADE"))
     experience = db.Column(db.Integer, nullable=False) 
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
     ratings = db.Column(db.Numeric(2, 1), nullable=True) #Ratings column added for Professional Model
     remarks = db.Column(db.Text, nullable=True)
     is_approved = db.Column(db.Boolean, default=None, nullable=True)
-    login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
+    login_id = db.Column(db.Integer, db.ForeignKey('login.id', ondelete="CASCADE"))
     service_requests = db.relationship('ServiceRequest', backref='professional', passive_deletes=True)
     
     def __repr__(self):
@@ -39,7 +39,7 @@ class Customer(db.Model):
     fullname = db.Column(db.String(100), nullable=False)
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
-    login_id = db.Column(db.Integer, db.ForeignKey('login.id'), ondelete="CASCADE")
+    login_id = db.Column(db.Integer, db.ForeignKey('login.id', ondelete="CASCADE"))
     service_requests = db.relationship('ServiceRequest', backref='customer', passive_deletes=True)
 
     def __repr__(self):
@@ -62,11 +62,9 @@ class Service(db.Model):
 class ServiceRequest(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    service_id = db.Column(db.Integer, ForeignKey('services.id'), nullable=False, ondelete="CASCADE")  
-    customer_id = db.Column(db.Integer, ForeignKey('customers.id'), nullable=False, ondelete="CASCADE")  
-    professional_id = db.Column(db.Integer, ForeignKey('professionals.id'), nullable=False, ondelete="CASCADE")
+    service_id = db.Column(db.Integer, ForeignKey('service.id', ondelete="CASCADE"), nullable=False ) 
+    customer_id = db.Column(db.Integer, ForeignKey('customer.id', ondelete="CASCADE"), nullable=False)
+    professional_id = db.Column(db.Integer, ForeignKey('professional.id', ondelete="CASCADE"), nullable=False)
     date_of_request = db.Column(db.DateTime(timezone=True), default=datetime.now, nullable=False)
     date_of_completion = db.Column(db.DateTime(timezone=True), nullable=True)
     service_status = db.Column(db.String(100), default='Requested', nullable=False)
-
-    

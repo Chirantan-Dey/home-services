@@ -1,11 +1,7 @@
 Flask
-Flask_Bcrypt
 Flask_Login
-Flask_Migrate
 flask_sqlalchemy
-flask_wtf
 matplotlib
 pandas
 plotly
-WTForms
 kaleido

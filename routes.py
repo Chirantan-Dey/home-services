@@ -4,15 +4,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-from .models import Login,Admin,Professional,Customer,Service,ServiceRequest
-from . import db
+from models import Login,Admin,Professional,Customer,Service,ServiceRequest
+from app import db
 
 
-routes_bp = Blueprint("routes", __name__)
+
 
 def register_routes(app,db):
-    @routes_bp.route('/')
-    @routes_bp.route('/login', methods=['GET', 'POST'])
+    @app.route('/')
+    @app.route('/login', methods=['GET', 'POST'])
     def login():
         
         if request.method == 'POST':
@@ -44,7 +44,7 @@ def register_routes(app,db):
 
         return render_template("login.html", user=current_user)
 
-    @routes_bp.route('/register/professional', methods=['GET', 'POST'])
+    @app.route('/register/professional', methods=['GET', 'POST'])
     def professional_register():
         services = Service.query.all()
         if request.method == 'POST':
@@ -80,7 +80,7 @@ def register_routes(app,db):
                 return redirect(url_for('home'))
         return render_template("professional_register.html",services=services)
     
-    @routes_bp.route('/register/customer', methods=['GET', 'POST'])
+    @app.route('/register/customer', methods=['GET', 'POST'])
     def customer_register():        
         if request.method == 'POST':
             email = request.form.get("Email")
@@ -112,14 +112,14 @@ def register_routes(app,db):
                 return redirect(url_for('home'))
         return render_template("customer_register.html")
     
-    @routes_bp.route('/logout')
+    @app.route('/logout')
     @login_required
     def logout():
         logout_user()
         return redirect(url_for('login'))
     
     
-    @routes_bp.route('/home')
+    @app.route('/home')
     @login_required
     def home():
         if current_user.user_type == 'admin':
@@ -131,7 +131,7 @@ def register_routes(app,db):
         else:
             return redirect(url_for('login'))
     
-    @routes_bp.route('/search')
+    @app.route('/search')
     @login_required
     def search():
         if current_user.user_type == 'admin':
@@ -143,7 +143,7 @@ def register_routes(app,db):
         else:
             return redirect(url_for('login'))
         
-    @routes_bp.route('/summary')
+    @app.route('/summary')
     @login_required
     def summary():
         if current_user.user_type == 'admin':
@@ -159,7 +159,7 @@ def register_routes(app,db):
     
         
     # Admin Home Route
-    @routes_bp.route('/home/admin')
+    @app.route('/home/admin')
     @login_required
     def admin_home():
         return render_template(
@@ -168,12 +168,12 @@ def register_routes(app,db):
             professionals=Professional.query.all(),
             service_requests=ServiceRequest.query.all()
             )
-    @routes_bp.route('/admin/services/new')
+    @app.route('/admin/services/new')
     @login_required
     def new_service():
         return render_template('services.html')
 
-    @routes_bp.route('/admin/services/edit/<int:service_id>', methods=['POST'])
+    @app.route('/admin/services/edit/<int:service_id>', methods=['POST'])
     @login_required
     def edit_service(service_id):
         service = Service.query.get_or_404(service_id)
@@ -183,18 +183,18 @@ def register_routes(app,db):
         service.status = request.form.get('status')
         service.reviews= request.form.get('reviews')
         db.session.commit()
-        return redirect(url_for('routes_bp.admin_home'))
+        return redirect(url_for('app.admin_home'))
 
-    @routes_bp.route('/admin/services/delete/<int:service_id>', methods=['POST'])
+    @app.route('/admin/services/delete/<int:service_id>', methods=['POST'])
     @login_required
     def delete_service(service_id):
         service = Service.query.get_or_404(service_id)
         db.session.delete(service)
         db.session.commit()
-        return redirect(url_for('routes_bp.admin_home'))
+        return redirect(url_for('app.admin_home'))
 
     
-    @routes_bp.route('/search/admin', methods=['GET'])
+    @app.route('/search/admin', methods=['GET'])
     @login_required
     def admin_search():
         search_type = request.args.get('search_type', 'all')
@@ -224,7 +224,7 @@ def register_routes(app,db):
             )
 
     # Admin Summary Route
-    @routes_bp.route('/summary/admin')
+    @app.route('/summary/admin')
     @login_required
     def admin_summary():
         # Chart directory
@@ -290,7 +290,7 @@ def register_routes(app,db):
         )
     
     # Professional Home Route
-    @routes_bp.route('/home/professional')
+    @app.route('/home/professional')
     @login_required
     def professional_home():
         professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
@@ -305,7 +305,7 @@ def register_routes(app,db):
             professional = professional
         )
     
-    @routes_bp.route('/professional/edit/<int:professional_id>', methods=['POST'])
+    @app.route('/professional/edit/<int:professional_id>', methods=['POST'])
     @login_required
     def edit_professional(professional_id):
         professional = Professional.query.get_or_404(professional_id)
@@ -316,28 +316,28 @@ def register_routes(app,db):
         professional.ratings = request.form.get('ratings')
         professional.remarks = request.form.get('remarks')
         db.session.commit()
-        return redirect(url_for('routes_bp.professional_home'))
+        return redirect(url_for('app.professional_home'))
 
 
-    @routes_bp.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
+    @app.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
     @login_required
     def accept_service_request(request_id):
         service_request = ServiceRequest.query.get_or_404(request_id)
         service_request.service_status = 'assigned'
         db.session.commit()
-        return redirect(url_for('routes_bp.professional_home'))
+        return redirect(url_for('app.professional_home'))
 
 
-    @routes_bp.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
+    @app.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
     @login_required
     def reject_service_request(request_id):
         service_request = ServiceRequest.query.get_or_404(request_id)
         service_request.service_status = 'closed'
         db.session.commit()
-        return redirect(url_for('routes_bp.professional_home'))
+        return redirect(url_for('app.professional_home'))
 
 
-    @routes_bp.route('/search/professional')
+    @app.route('/search/professional')
     @login_required
     def professional_search():
         search_term = request.args.get('search_term', '')
@@ -354,7 +354,7 @@ def register_routes(app,db):
 
 
     # Professional Summary Route
-    @routes_bp.route('/summary/professional')
+    @app.route('/summary/professional')
     @login_required
     def professional_summary():
         # Chart directory
@@ -417,7 +417,7 @@ def register_routes(app,db):
         )
 
     # Customer Home Route
-    @routes_bp.route('/home/customer')
+    @app.route('/home/customer')
     @login_required
     def customer_home():
         customer_id = Customer.query.filter_by(login_id = current_user.id).first().id
@@ -433,7 +433,7 @@ def register_routes(app,db):
         )
 
 
-    @routes_bp.route('/customer/book/<int:service_id>/<int:professional_id>', methods=['POST'])
+    @app.route('/customer/book/<int:service_id>/<int:professional_id>', methods=['POST'])
     @login_required
     def book_service_request(service_id,professional_id):
         customer_id = Customer.query.filter_by(login_id=current_user.id).first().id
@@ -448,18 +448,18 @@ def register_routes(app,db):
         db.session.add(new_service_request)
         db.session.commit()
 
-        return redirect(url_for('routes_bp.customer_home'))
+        return redirect(url_for('app.customer_home'))
 
-    @routes_bp.route('/customer/close/<int:request_id>', methods=['POST'])
+    @app.route('/customer/close/<int:request_id>', methods=['POST'])
     @login_required
     def customer_close_request(request_id):
         service_request = ServiceRequest.query.get_or_404(request_id)
         service_request.service_status = 'closed'
         db.session.commit()
-        return redirect(url_for('routes_bp.customer_home'))
+        return redirect(url_for('app.customer_home'))
 
 
-    @routes_bp.route('/search/customer')
+    @app.route('/search/customer')
     @login_required
     def customer_search():
         search_term = request.args.get('search_term', '')
@@ -476,7 +476,7 @@ def register_routes(app,db):
         )
 
     # Customer Summary Route
-    @routes_bp.route('/summary/customer')
+    @app.route('/summary/customer')
     @login_required
     def customer_summary():
         # Chart directory
@@ -509,7 +509,7 @@ def register_routes(app,db):
             service_request_chart='charts/customer_service_requests.png',
         )
     
-    @routes_bp.route('/customer/edit/<int:customer_id>', methods=['POST'])
+    @app.route('/customer/edit/<int:customer_id>', methods=['POST'])
     @login_required
     def edit_customer(customer_id):
         customer = Customer.query.get_or_404(customer_id)
@@ -517,4 +517,4 @@ def register_routes(app,db):
         customer.address = request.form.get('address')
         customer.pincode = request.form.get('pincode')
         db.session.commit()
-        return redirect(url_for('routes_bp.customer_home'))
+        return redirect(url_for('app.customer_home'))
