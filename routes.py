@@ -1,11 +1,12 @@
-from app import db
-from models import Login,Admin,Professional,Customer,Service,ServiceRequest
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime
+from .models import Login,Admin,Professional,Customer,Service,ServiceRequest
+from . import db
+
 
 routes_bp = Blueprint("routes", __name__)
 
