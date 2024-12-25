@@ -1,7 +1,9 @@
 Flask
 Flask_Login
 flask_sqlalchemy
+flask-migrate
 matplotlib
+numpy
 pandas
 plotly
 werkzeug

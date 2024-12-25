@@ -197,9 +197,16 @@ def register_routes(app,db):
     @app.route('/admin/services/new')
     @login_required
     def new_service():
+        if request.method == 'POST':
+            service_name = request.form.get('service_name')
+            description = request.form.get('description')
+            base_price = request.form.get('base_price')
+            status = request.form.get('status')
+            reviews= request.form.get('reviews')
+            db.session.commit()
         return render_template('services.html')
 
-    @app.route('/admin/services/edit/<int:service_id>', methods=['POST'])
+    @app.route('/admin/services/edit/<int:service_id>', methods=['GET', 'POST'])
     @login_required
     def edit_service(service_id):
         service = Service.query.get_or_404(service_id)
@@ -291,7 +298,7 @@ def register_routes(app,db):
         high_count = 0
 
         for professional in professionals:
-            if professional.ratings:
+            if professional.ratings is not None:
                 if professional.ratings < 3:
                     low_count += 1
                 elif 3 <= professional.ratings <= 4:

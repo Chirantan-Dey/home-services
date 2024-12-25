@@ -1,7 +1,7 @@
 # Ignore Windows system files
 desktop.ini
 *.log
-
+.venv
 # Ignore Python cache files
 __pycache__/
 

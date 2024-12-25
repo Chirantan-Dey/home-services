@@ -7,31 +7,33 @@
 
 {% block form %}
 
-{{ login_form.hidden_tag() }}
+<form method="post" action="{{ url_for('new_service') }}" class="bg-dark p-4 rounded">
 
-<div class="m-4">
-    <h1>New Service</h1>
-</div>
 
-<div class="form-floating mb-3">
-    <input type="text" class="form-control" id="ServiceName" placeholder="Service Name">
-    <label for="ServiceName">Service Name</label>
-</div>
+    <div class="m-4">
+        <h1>New Service</h1>
+    </div>
 
-<div class="form-floating mb-3">
-    <textarea class="form-control" placeholder="Enter service description" id="Description" style="height: 100px;"></textarea>
-    <label for="Description">Description</label>
-</div>
+    <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="ServiceName" placeholder="Service Name">
+        <label for="ServiceName">Service Name</label>
+    </div>
 
-<div class="form-floating">    
-    <input type="number" class="form-control" id="BasePrice" placeholder="Base Price">    
-    <label for="BasePrice">Base Price</label>
-</div>
+    <div class="form-floating mb-3">
+        <textarea class="form-control" placeholder="Enter service description" id="Description"
+            style="height: 100px;"></textarea>
+        <label for="Description">Description</label>
+    </div>
 
-<div class="d-md-flex justify-content-center mt-3">
-    <button class="btn btn-primary mx-3" type="submit">Add</button>
-    <button class="btn btn-primary mx-3" type="submit">Cancel</button>            
-</div>
+    <div class="form-floating">
+        <input type="number" class="form-control" id="BasePrice" placeholder="Base Price">
+        <label for="BasePrice">Base Price</label>
+    </div>
 
+    <div class="d-md-flex justify-content-center mt-3">
+        <button class="btn btn-primary mx-3" type="submit">Add</button>
+        <button class="btn btn-primary mx-3" type="submit">Cancel</button>
+    </div>
+</form>
 
 {% endblock %}
