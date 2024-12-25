@@ -161,7 +161,15 @@
                         <td>{{ professional.experience }}</td>
                         <td>{{ professional.service_name }}</td>
                         <td>
-                            <button class="btn btn-primary">View</button>
+                            {% if professional.is_approved %}
+                            <form method="POST" action="{{ url_for('delete_professional', professional_id=professional.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('approve_professional', professional_id=professional.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-success">Approve</button>
+                            </form>
+                            {% endif %}
                         </td>
                         <td>{{ professional.ratings if professional.ratings else 'N/A' }}</td>
                         <td>{{ professional.remarks if professional.remarks else 'N/A' }}</td>

@@ -24,7 +24,7 @@ class Professional(db.Model):
     experience = db.Column(db.Integer, nullable=False) 
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
-    ratings = db.Column(db.Numeric(2, 1), nullable=True) #Ratings column added for Professional Model
+    ratings = db.Column(db.Integer, nullable=True) #Ratings column added for Professional Model
     remarks = db.Column(db.Text, nullable=True)
     is_approved = db.Column(db.Boolean, default=None, nullable=True)
     login_id = db.Column(db.Integer, db.ForeignKey('login.id', ondelete="CASCADE"))

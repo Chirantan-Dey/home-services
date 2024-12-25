@@ -76,12 +76,12 @@ def register_routes(app,db):
         if request.method == 'POST':
             email = request.form.get("Email")
             password = request.form.get("Password")
-            full_name = request.form.get("FullName")
+            fullname = request.form.get("FullName")
             service_id = request.form.get("ServiceID")
             experience = request.form.get("Experience")
             address = request.form.get("Address")
             pincode = request.form.get("Pincode")
-            email_exists = Professional.query.filter_by(email=email).first()
+            email_exists = Login.query.filter_by(email=email).first()
             if email_exists:
                 flash('Email is already in use.', category='error')            
             else:
@@ -93,7 +93,7 @@ def register_routes(app,db):
                 db.session.add(new_login)
                 db.session.commit()
                 new_professional = Professional(                    
-                    full_name=full_name,
+                    fullname=fullname,
                     service_id=service_id,
                     experience=experience,
                     address=address,
@@ -111,7 +111,7 @@ def register_routes(app,db):
         if request.method == 'POST':
             email = request.form.get("Email")
             password = request.form.get("Password")
-            full_name = request.form.get("FullName")
+            fullname = request.form.get("FullName")
             address = request.form.get("Address")
             pincode = request.form.get("Pincode")
             email_exists = Login.query.filter_by(email=email).first()
@@ -126,7 +126,7 @@ def register_routes(app,db):
                 db.session.add(new_login)
                 db.session.commit()
                 new_customer = Customer(                    
-                    full_name=full_name,                    
+                    fullname=fullname,                    
                     address=address,
                     pincode=pincode,
                     login_id=new_login.id
@@ -194,15 +194,20 @@ def register_routes(app,db):
             professionals=Professional.query.all(),
             service_requests=ServiceRequest.query.all()
             )
-    @app.route('/admin/services/new')
+    @app.route('/admin/services/new', methods=['GET', 'POST'])
     @login_required
     def new_service():
         if request.method == 'POST':
             service_name = request.form.get('service_name')
             description = request.form.get('description')
             base_price = request.form.get('base_price')
-            status = request.form.get('status')
-            reviews= request.form.get('reviews')
+            
+            new_service = Service(
+                service_name=service_name,
+                description=description,
+                base_price=base_price                
+            )
+            db.session.add(new_service)
             db.session.commit()
         return render_template('services.html')
 
@@ -212,11 +217,9 @@ def register_routes(app,db):
         service = Service.query.get_or_404(service_id)
         service.service_name = request.form.get('service_name')
         service.description = request.form.get('description')
-        service.base_price = request.form.get('base_price')
-        service.status = request.form.get('status')
-        service.reviews= request.form.get('reviews')
+        service.base_price = request.form.get('base_price')        
         db.session.commit()
-        return redirect(url_for('app.admin_home'))
+        return redirect(url_for('admin_home'))
 
     @app.route('/admin/services/delete/<int:service_id>', methods=['POST'])
     @login_required
@@ -224,10 +227,10 @@ def register_routes(app,db):
         service = Service.query.get_or_404(service_id)
         db.session.delete(service)
         db.session.commit()
-        return redirect(url_for('app.admin_home'))
+        return redirect(url_for('admin_home'))
 
     
-    @app.route('/search/admin', methods=['GET'])
+    @app.route('/search/admin', methods=['GET', 'POST'])
     @login_required
     def admin_search():
         search_type = request.args.get('search_type', 'all')
@@ -298,7 +301,7 @@ def register_routes(app,db):
         high_count = 0
 
         for professional in professionals:
-            if professional.ratings is not None:
+            if professional.ratings:                
                 if professional.ratings < 3:
                     low_count += 1
                 elif 3 <= professional.ratings <= 4:
@@ -308,12 +311,18 @@ def register_routes(app,db):
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
         sizes = [low_count, medium_count, high_count]
-        sizes = [0 if np.isnan(size) else size for size in sizes]
-        colors = ['lightcoral', 'lightskyblue', 'lightgreen']
-        plt.figure(figsize=(8, 6))
-        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
-        plt.title("Professional Ratings Distribution")
-        plt.axis('equal')
+    
+        if sum(sizes) == 0:
+            sizes = [1, 1, 1]  # Default values to prevent NaN issues
+            labels = ['No Data', 'No Data', 'No Data']        
+            plt.figure(figsize=(8, 6))
+            plt.pie(sizes, labels=labels)
+            plt.title("Professional Ratings Distribution")
+            plt.axis('equal')
+        else:            
+            
+            plt.text(0.5, 0.5, '', fontsize=12, ha='center', va='center')
+            plt.axis('off')  # Hide axes for blank image
         plt.savefig(os.path.join(chart_dir, 'professional_ratings.png'))
         plt.close()
     
@@ -360,6 +369,22 @@ def register_routes(app,db):
         service_request.service_status = 'assigned'
         db.session.commit()
         return redirect(url_for('app.professional_home'))
+
+    @app.route('/admin/professional/approve/<int:professional_id>', methods=['POST'])
+    @login_required
+    def approve_professional(professional_id):
+        professional = Professional.query.get_or_404(professional_id)
+        professional.is_approved = True
+        db.session.commit()
+        return redirect(url_for('admin_home'))
+
+    @app.route('/admin/professional/delete/<int:professional_id>', methods=['POST'])
+    @login_required
+    def delete_professional(professional_id):
+        professional = Professional.query.get_or_404(professional_id)
+        db.session.delete(professional)
+        db.session.commit()
+        return redirect(url_for('admin_home'))
 
 
     @app.route('/professional/service_request/reject/<int:request_id>', methods=['POST'])
@@ -439,7 +464,7 @@ def register_routes(app,db):
         sizes = [0 if np.isnan(size) else size for size in sizes]
         colors = ['lightcoral', 'lightskyblue', 'lightgreen']
         plt.figure(figsize=(8, 6))
-        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        plt.pie(sizes, labels=labels, colors=colors)
         plt.title("Professional Ratings Distribution")
         plt.axis('equal')
         plt.savefig(os.path.join(chart_dir, 'professional_professional_ratings.png'))
