@@ -1,4 +1,5 @@
 {% extends "base2.html" %}
+{%block nav_title%}admin home{%endblock%}
 
 {% block title %}Admin Dashboard{% endblock %}
 
@@ -146,8 +147,6 @@
                         <th scope="col">Experience (in Yrs.)</th>
                         <th scope="col">Service Name</th>
                         <th scope="col">Action</th>
-                        <th scope="col">Ratings</th>
-                        <th scope="col">Remarks</th>
                         <th scope="col">Approved</th>
                     </tr>
                 </thead>
@@ -171,8 +170,6 @@
                             </form>
                             {% endif %}
                         </td>
-                        <td>{{ professional.ratings if professional.ratings else 'N/A' }}</td>
-                        <td>{{ professional.remarks if professional.remarks else 'N/A' }}</td>
                         <td>{{ professional.is_approved }}</td>
                     </tr>
                     <!-- Professional Modal -->
@@ -192,13 +189,6 @@
                                     <p><strong>Experience:</strong> {{ professional.experience }} years</p>
                                     <p><strong>Service:</strong> {{ professional.service_name }}</p>
                                     <p><strong>Address:</strong> {{ professional.address }}</p>
-                                    <p><strong>Pincode:</strong> {{ professional.pincode }}</p>
-                                    <p><strong>Ratings:</strong> {{ professional.ratings if professional.ratings else
-                                        'N/A' }}</p>
-                                    <p><strong>Remarks:</strong> {{ professional.remarks if professional.remarks else
-                                        'N/A' }}</p>
-                                    <p><strong>Approved:</strong> {{ professional.is_approved }}</p>
-
                                 </div>
                             </div>
                         </div>
@@ -220,6 +210,9 @@
                         <th scope="col">Assigned Professional</th>
                         <th scope="col">Requested Date</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Ratings</th>
+                        <th scope="col">Remarks</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -229,6 +222,9 @@
                         <td>{{ request.professional.fullname if request.professional else 'N/A' }}</td>
                         <td>{{ request.date_of_request }}</td>
                         <td>{{ request.service_status }}</td>
+                        <td>{{ request.ratings if request.ratings else 'N/A' }}</td>
+                        <td>{{ request.remarks if request.remarks else 'N/A' }}</td>
+
                     </tr>
                     {% endfor %}
                 </tbody>

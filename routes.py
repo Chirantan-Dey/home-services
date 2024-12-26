@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user,login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -295,16 +297,16 @@ def register_routes(app,db):
 
 
         # 2. Professional Ratings Chart
-        professionals = Professional.query.all()
+        service_requests = ServiceRequest.query.all()
         low_count = 0
         medium_count = 0
         high_count = 0
 
-        for professional in professionals:
-            if professional.ratings:                
-                if professional.ratings < 3:
+        for request in service_requests:
+            if request.ratings:                
+                if request.ratings < 3:
                     low_count += 1
-                elif 3 <= professional.ratings <= 4:
+                elif 3 <= request.ratings <= 4:
                     medium_count += 1
                 else:
                     high_count += 1
@@ -313,16 +315,13 @@ def register_routes(app,db):
         sizes = [low_count, medium_count, high_count]
     
         if sum(sizes) == 0:
-            sizes = [1, 1, 1]  # Default values to prevent NaN issues
-            labels = ['No Data', 'No Data', 'No Data']        
+            plt.text(0.5, 0.5, '', fontsize=12, ha='center', va='center')
+            plt.axis('off')  # Hide axes for blank image
+        else:            
             plt.figure(figsize=(8, 6))
             plt.pie(sizes, labels=labels)
             plt.title("Professional Ratings Distribution")
             plt.axis('equal')
-        else:            
-            
-            plt.text(0.5, 0.5, '', fontsize=12, ha='center', va='center')
-            plt.axis('off')  # Hide axes for blank image
         plt.savefig(os.path.join(chart_dir, 'professional_ratings.png'))
         plt.close()
     
@@ -359,7 +358,7 @@ def register_routes(app,db):
         professional.ratings = request.form.get('ratings')
         professional.remarks = request.form.get('remarks')
         db.session.commit()
-        return redirect(url_for('app.professional_home'))
+        return redirect(url_for('professional_home'))
 
 
     @app.route('/professional/service_request/accept/<int:request_id>', methods=['POST'])
@@ -368,7 +367,7 @@ def register_routes(app,db):
         service_request = ServiceRequest.query.get_or_404(request_id)
         service_request.service_status = 'assigned'
         db.session.commit()
-        return redirect(url_for('app.professional_home'))
+        return redirect(url_for('professional_home'))
 
     @app.route('/admin/professional/approve/<int:professional_id>', methods=['POST'])
     @login_required
@@ -393,7 +392,7 @@ def register_routes(app,db):
         service_request = ServiceRequest.query.get_or_404(request_id)
         service_request.service_status = 'closed'
         db.session.commit()
-        return redirect(url_for('app.professional_home'))
+        return redirect(url_for('professional_home'))
 
 
     @app.route('/search/professional')
@@ -447,26 +446,30 @@ def register_routes(app,db):
 
 
         # 2. Professional Ratings Chart
-        professional = Professional.query.filter_by(login_id = current_user.id).first()
+        professional_id= Professional.query.filter_by(login_id = current_user.id).first().id
+        service_requests = ServiceRequest.query.filter_by(professional_id=professional_id).all()
         low_count = 0
         medium_count = 0
         high_count = 0
-        if professional.ratings:
-            if professional.ratings < 3:
-                low_count += 1
-            elif 3 <= professional.ratings <= 4:
-                medium_count += 1
-            else:
-                high_count += 1
+        for request in service_requests:
+            if request.ratings:
+                if request.ratings < 3:
+                    low_count += 1
+                elif 3 <= request.ratings <= 4:
+                    medium_count += 1
+                else:
+                    high_count += 1
 
         labels = ['Low (<3)', 'Medium (3-4)', 'High (>4)']
         sizes = [low_count, medium_count, high_count]
-        sizes = [0 if np.isnan(size) else size for size in sizes]
-        colors = ['lightcoral', 'lightskyblue', 'lightgreen']
-        plt.figure(figsize=(8, 6))
-        plt.pie(sizes, labels=labels, colors=colors)
-        plt.title("Professional Ratings Distribution")
-        plt.axis('equal')
+        if sum(sizes) == 0:
+            plt.text(0.5, 0.5, '', fontsize=12, ha='center', va='center')
+            plt.axis('off')  # Hide axes for blank image
+        else:            
+            plt.figure(figsize=(8, 6))
+            plt.pie(sizes, labels=labels)
+            plt.title("Professional Ratings Distribution")
+            plt.axis('equal')
         plt.savefig(os.path.join(chart_dir, 'professional_professional_ratings.png'))
         plt.close()
 
@@ -484,12 +487,14 @@ def register_routes(app,db):
         services = Service.query.all()
         customer = Customer.query.get_or_404(customer_id)
         service_requests = ServiceRequest.query.filter_by(customer_id = customer_id).all()
+        professionals = Professional.query.all()
 
         return render_template(
             "customer_home.html",
             services = services,
             service_requests= service_requests,
-            customer = customer
+            customer = customer,
+            professionals = professionals
         )
 
 
@@ -508,15 +513,29 @@ def register_routes(app,db):
         db.session.add(new_service_request)
         db.session.commit()
 
-        return redirect(url_for('app.customer_home'))
+        return redirect(url_for('customer_home'))
 
     @app.route('/customer/close/<int:request_id>', methods=['POST'])
     @login_required
     def customer_close_request(request_id):
         service_request = ServiceRequest.query.get_or_404(request_id)
+        rating = request.form.get('rating')
+        remarks = request.form.get('remarks')
+        if rating:
+            try:
+                rating = int(rating)
+                if 0 <= rating <= 5:
+                    service_request.ratings = rating
+                    if remarks:
+                        service_request.remarks = remarks
+                    db.session.commit()
+                else:
+                    flash('Invalid rating value.', category='error')
+            except ValueError:
+                flash('Invalid rating value.', category='error')
         service_request.service_status = 'closed'
         db.session.commit()
-        return redirect(url_for('app.customer_home'))
+        return redirect(url_for('customer_home'))
 
 
     @app.route('/search/customer')
@@ -524,6 +543,10 @@ def register_routes(app,db):
     def customer_search():
         search_term = request.args.get('search_term', '')
         services = Service.query.all()
+        professionals = Professional.query.all()
+        customer_id = Customer.query.filter_by(login_id = current_user.id).first().id
+        service_requests = ServiceRequest.query.filter_by(customer_id = customer_id).all()
+        customer = Customer.query.get_or_404(customer_id)
         results = []
         if search_term:
             search_term = f"%{search_term}%"
@@ -532,7 +555,11 @@ def register_routes(app,db):
             "customer_search.html",
             search_term= search_term,
             services = services,
-            results=results
+            service_requests= service_requests,
+            results=results,
+            customer = customer,
+            professionals = professionals
+
         )
 
     # Customer Summary Route
@@ -577,4 +604,4 @@ def register_routes(app,db):
         customer.address = request.form.get('address')
         customer.pincode = request.form.get('pincode')
         db.session.commit()
-        return redirect(url_for('app.customer_home'))
+        return redirect(url_for('customer_home'))

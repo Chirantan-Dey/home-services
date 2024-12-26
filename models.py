@@ -24,8 +24,6 @@ class Professional(db.Model):
     experience = db.Column(db.Integer, nullable=False) 
     address = db.Column(db.Text, nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
-    ratings = db.Column(db.Integer, nullable=True) #Ratings column added for Professional Model
-    remarks = db.Column(db.Text, nullable=True)
     is_approved = db.Column(db.Boolean, default=None, nullable=True)
     login_id = db.Column(db.Integer, db.ForeignKey('login.id', ondelete="CASCADE"))
     service_requests = db.relationship('ServiceRequest', backref='professional', passive_deletes=True)
@@ -68,3 +66,5 @@ class ServiceRequest(db.Model):
     date_of_request = db.Column(db.DateTime(timezone=True), default=datetime.now, nullable=False)
     date_of_completion = db.Column(db.DateTime(timezone=True), nullable=True)
     service_status = db.Column(db.String(100), default='Requested', nullable=False)
+    ratings = db.Column(db.Integer, nullable=True)
+    remarks = db.Column(db.Text, nullable=True)
