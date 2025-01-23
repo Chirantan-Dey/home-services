@@ -49,31 +49,14 @@ A Flask-based web application for connecting customers with service professional
 - SQLite (Development)
 - PostgreSQL-ready architecture
 
-## Project Structure
 
-```
-service-portal/
-├── instance/               # Database instance
-├── static/                 # Static assets
-│   ├── charts/             # Generated data visualizations
-│   └── *.css               # Style sheets
-├── templates/              # Jinja2 templates
-│   ├── admin_*.html        # Admin interface views
-│   ├── professional_*.html # Professional user views
-│   ├── customer_*.html     # Customer user views
-│   └── base*.html          # Template inheritance base
-├── app.py                  # Flask application factory
-├── models.py               # SQLAlchemy models
-├── routes.py               # Application routes
-└── requirements.txt        # Python dependencies
-```
 
 ## Installation
 
 1. Clone repository:
    ```bash
-   git clone https://github.com/yourusername/service-portal.git
-   cd service-portal
+   git clone https://github.com/Chirantan-Dey/mad2.git
+   cd mad2
    ```
 
 2. Create virtual environment:
