@@ -102,7 +102,7 @@ service-portal/
 
 6. Run application:
    ```bash
-   flask run
+   python run.py
    ```
 
 ## Configuration
