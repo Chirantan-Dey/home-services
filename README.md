@@ -109,15 +109,12 @@ service-portal/
 
 Create `.env` file with:
 ```ini
-SECRET_KEY=your-secret-key-here
-DATABASE_URI=sqlite:///instance/database.sqlite3
+
 ```
 
 ## Screenshots
 
-![Admin Dashboard](/static/charts/service_requests.png "Admin Analytics")
-![Professional Profile](/static/charts/professional_ratings.png "Professional Dashboard")
-![Service Search](/templates/professional_search.html "Search Interface")
+
 
 ## License
 MIT License
